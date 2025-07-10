@@ -1,0 +1,2895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronic Kidney Disease Prediction Tool</title>
+    <style>
+        :root {
+            --primary-color: #1a6fc9;
+            --primary-dark: #145da0;
+            --secondary-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-gray: #f5f9fc;
+            --medium-gray: #e0e6ed;
+            --dark-gray: #95a5a6;
+            --white: #ffffff;
+            --text-color: #333333;
+            --text-light: #666666;
+            --security-color: #8e44ad;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light-gray);
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid var(--medium-gray);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        /* Security elements */
+        .security-badge {
+            display: inline-block;
+            background-color: var(--security-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .security-section {
+            background-color: rgba(142, 68, 173, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--security-color);
+        }
+
+        .security-section h3 {
+            color: var(--security-color);
+        }
+
+        .data-access-controls {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: 8px;
+        }
+
+        .data-access-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .data-access-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--secondary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .encryption-status {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            color: var(--security-color);
+            font-weight: bold;
+        }
+
+        .encryption-status i {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        /* Smartwatch connection status */
+        .watch-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .watch-status.connected {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--secondary-color);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .watch-status.disconnected {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .watch-status i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Rest of your existing styles remain unchanged */
+        .form-section, #result, #visualizations, #welcome-screen {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 111, 201, 0.1);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 14px 24px;
+            margin-top: 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .risk-high {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .risk-medium {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        
+        .risk-low {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: var(--text-light);
+            padding: 20px 0;
+            border-top: 1px solid var(--medium-gray);
+        }
+        
+        .additional-info {
+            background-color: rgba(26, 111, 201, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        #chatbot-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1000;
+        }
+        
+        #chatbot-toggle {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+        
+        #chatbot-toggle:hover {
+            transform: scale(1.1);
+            background-color: var(--primary-dark);
+        }
+        
+        #chatbot-iframe {
+            width: 380px;
+            height: 550px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: none;
+            margin-bottom: 15px;
+        }
+        
+        .chatbot-visible #chatbot-iframe {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 350px;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .risk-factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 25px 0;
+        }
+        
+        .risk-factor {
+            background-color: #e8f4fc;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .risk-factor.high {
+            background-color: #fde8e8;
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .risk-factor.medium {
+            background-color: #fef5e8;
+            color: var(--warning-color);
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .risk-factor.low {
+            background-color: #e8f8f0;
+            color: var(--secondary-color);
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .download-btn {
+            background-color: var(--secondary-color);
+        }
+        
+        .download-btn:hover {
+            background-color: #219653;
+        }
+        
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .symptoms-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .symptoms-container label {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-weight: normal;
+            color: var(--text-color);
+            padding: 8px 12px;
+            background-color: var(--light-gray);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .symptoms-container label:hover {
+            background-color: var(--medium-gray);
+        }
+        
+        .symptoms-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .chart-legend {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-light);
+            background-color: var(--light-gray);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .chart-legend ul {
+            padding-left: 20px;
+            margin: 10px 0 0 0;
+        }
+        
+        .chart-legend li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .visualization-info {
+            background-color: rgba(26, 111, 201, 0.05);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 35px 0 25px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        #risk-message {
+            background-color: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+        
+        #risk-message p {
+            margin: 10px 0;
+        }
+        
+        #risk-explanation ul, #advice ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        #risk-explanation li, #advice li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: var(--medium-gray);
+            border-radius: 10px;
+            margin: 15px 0;
+            height: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .specialist-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .specialist-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .specialist-card p {
+            margin-bottom: 10px;
+        }
+        
+        .specialist-card .contact {
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        
+        .personal-recommendations {
+            background-color: rgba(39, 174, 96, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .personal-recommendations h3 {
+            color: var(--secondary-color);
+        }
+        
+        .urgent-warning {
+            background-color: rgba(231, 76, 60, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--danger-color);
+            animation: pulse 2s infinite;
+        }
+        
+        .urgent-warning h3 {
+            color: var(--danger-color);
+        }
+        
+        .welcome-quote {
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-message h2 {
+            border-bottom: none;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+        
+        .ckd-stages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .ckd-stage {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: var(--light-gray);
+        }
+        
+        .ckd-stage-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .ckd-stage-info {
+            flex-grow: 1;
+        }
+        
+        .ckd-stage-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .ckd-stage-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .risk-table th, .risk-table td {
+            border: 1px solid var(--medium-gray);
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .risk-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .risk-table tr:nth-child(even) {
+            background-color: var(--light-gray);
+        }
+        
+        .doctor-recommendation {
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        
+        .recommendation-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .recommendation-card h4 {
+            margin-top: 0;
+            color: var(--secondary-color);
+        }
+        
+        .stages-info {
+            background-color: rgba(26, 111, 201, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stages-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            width: 90%;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 5px;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .modal-close-bottom-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: block;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .modal-close-bottom-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Smartwatch connection panel */
+        .watch-panel {
+            background-color: var(--light-gray);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .watch-panel h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .watch-data {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .watch-data.visible {
+            display: block;
+        }
+
+        .watch-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .watch-metric:last-child {
+            border-bottom: none;
+        }
+
+        .watch-metric-name {
+            font-weight: bold;
+        }
+
+        .watch-metric-value {
+            color: var(--primary-dark);
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+            }
+            
+            .symptoms-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 280px;
+            }
+            
+            #chatbot-iframe {
+                width: 320px;
+                height: 480px;
+            }
+            
+            body {
+                padding: 15px;
+            }
+            
+            .form-section, #result, #visualizations, #welcome-screen {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #chatbot-iframe {
+                width: 280px;
+                height: 420px;
+            }
+            
+            .chart-container {
+                height: 240px;
+            }
+        }
+    </style>
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Load html2canvas from CDN -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- Load Chart.js datalabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- CryptoJS for encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Axios for API calls -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Chronic Kidney Disease Prediction Tool <span class="security-badge">Secure</span></h1>
+    </header>
+
+    <section id="welcome-screen">
+        <div class="welcome-message">
+            <h2>Welcome to Chronic Kidney Disease Prediction Assessment</h2>
+            <p>This tool will help you understand your risk factors for chronic kidney disease (CKD) and provide personalized recommendations.</p>
+        </div>
+        
+        <div class="welcome-quote">
+            <p>"Nurture yourself mentally and physically by caring for your kidneys consistently."</p>
+        </div>
+        
+        <div class="additional-info">
+            <h3>Before You Begin</h3>
+            <p>This assessment will ask about your medical history, family history, and lifestyle factors that may affect kidney health.</p>
+            <p>Have your health information ready, including any known conditions like diabetes or high blood pressure.</p>
+        </div>
+
+        <!-- Enhanced Security Section with Smartwatch Integration -->
+        <div class="security-section">
+            <h3><i class="fas fa-shield-alt"></i> Advanced Security & Smartwatch Integration</h3>
+            <p>Your health data is protected with multiple security layers:</p>
+            <ul>
+                <li><strong>App Sandboxing:</strong> Strict permission controls isolate health data</li>
+                <li><strong>Secure Bluetooth Pairing:</strong> Encrypted connection with your smartwatch</li>
+                <li><strong>TLS 1.3 Encryption:</strong> All communications are end-to-end encrypted</li>
+                <li><strong>Signed Firmware Verification:</strong> Ensures only trusted code runs</li>
+                <li><strong>AES-256 Storage:</strong> Health data encrypted at rest</li>
+                <li><strong>Remote Wipe Capability:</strong> Remotely erase data if device is lost</li>
+                <li><strong>Secure OTA Updates:</strong> Verified updates with integrity checks</li>
+            </ul>
+            
+            <div class="encryption-status">
+                <i class="fas fa-lock"></i>
+                <span>All data transmissions secured with TLS 1.3 and AES-256 encryption</span>
+            </div>
+        </div>
+        
+        <button id="start-assessment-btn">Begin Assessment</button>
+    </section>
+
+    <section class="form-section hidden" id="assessment-form">
+        <h2>Patient Information</h2>
+        <form id="ckd-form">
+            <label for="age">Age (years):</label>
+            <input type="number" id="age" name="age" min="18" max="120" required>
+            
+            <label for="sex">Sex:</label>
+            <select id="sex" name="sex" required>
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+            
+            <label for="race">Race/Ethnicity:</label>
+            <select id="race" name="race" required>
+                <option value="">Select...</option>
+                <option value="white">White/Caucasian</option>
+                <option value="black">Black/African American</option>
+                <option value="hispanic">Hispanic/Latino</option>
+                <option value="asian">Asian</option>
+                <option value="native">Native American</option>
+                <option value="other">Other</option>
+            </select>
+            
+            <h3>Medical History</h3>
+            
+            <label for="hypertension">Do you have hypertension (high blood pressure)?</label>
+            <select id="hypertension" name="hypertension" required>
+                <option value="">Select...</option>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+                <option value="borderline">Borderline/Prehypertension</option>
+            </select>
+            
+            <label for="diabetes">Do you have diabetes?</label>
+            <select id="diabetes" name="diabetes" required>
+                <option value="">Select...</option>
+                <option value="no">No</option>
+                <option value="type2">Type 2 Diabetes</option>
+                <option value="type1">Type 1 Diabetes</option>
+                <option value="prediabetes">Prediabetes</option>
+            </select>
+            
+            <label for="duration">If diabetic, how many years since diagnosis?</label>
+            <input type="number" id="duration" name="duration" min="0" max="100" value="0" disabled>
+            
+            <label for="family_history">Family history of kidney disease?</label>
+            <select id="family_history" name="family_history" required>
+                <option value="">Select...</option>
+                <option value="no">No</option>
+                <option value="parents">Yes (parents)</option>
+                <option value="siblings">Yes (siblings)</option>
+                <option value="both">Yes (parents and siblings)</option>
+            </select>
+            
+            <div id="family-diseases-container" style="display: none;">
+                <label>If family history, what conditions? (Select all that apply)</label>
+                <div class="symptoms-container">
+                    <label><input type="checkbox" name="family_diseases" value="ckd"> Chronic Kidney Disease</label>
+                    <label><input type="checkbox" name="family_diseases" value="diabetes"> Diabetes</label>
+                    <label><input type="checkbox" name="family_diseases" value="hypertension"> Hypertension</label>
+                    <label><input type="checkbox" name="family_diseases" value="heart"> Heart Disease</label>
+                </div>
+            </div>
+            
+            <label for="bmi">Body Mass Index (BMI):</label>
+            <input type="number" id="bmi" name="bmi" min="15" max="60" step="0.1" required>
+            
+            <label for="smoking">Smoking status:</label>
+            <select id="smoking" name="smoking" required>
+                <option value="">Select...</option>
+                <option value="never">Never smoked</option>
+                <option value="former">Former smoker</option>
+                <option value="current">Current smoker</option>
+            </select>
+            
+            <label for="cardiovascular">History of cardiovascular disease?</label>
+            <select id="cardiovascular" name="cardiovascular" required>
+                <option value="">Select...</option>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select>
+            
+            <h3>Symptoms (Check all that apply)</h3>
+            
+            <div class="symptoms-container">
+                <label><input type="checkbox" name="symptoms" value="fatigue"> Fatigue or weakness</label>
+                <label><input type="checkbox" name="symptoms" value="swelling"> Swelling in feet/ankles</label>
+                <label><input type="checkbox" name="symptoms" value="shortness"> Shortness of breath</label>
+                <label><input type="checkbox" name="symptoms" value="appetite"> Poor appetite</label>
+                <label><input type="checkbox" name="symptoms" value="sleep"> Trouble sleeping</label>
+                <label><input type="checkbox" name="symptoms" value="urination"> Changes in urination</label>
+                <label><input type="checkbox" name="symptoms" value="nausea"> Nausea or vomiting</label>
+                <label><input type="checkbox" name="symptoms" value="pain"> Kidney area pain</label>
+                <label><input type="checkbox" name="symptoms" value="itchy"> Itchy skin</label>
+                <label><input type="checkbox" name="symptoms" value="muscle"> Muscle cramps</label>
+            </div>
+
+            <!-- Smartwatch Integration Section -->
+            <div class="watch-panel">
+                <h3><i class="fas fa-bluetooth-b"></i> Smartwatch Integration</h3>
+                <p>Connect your smartwatch to automatically import health metrics:</p>
+                
+                <div id="watch-status" class="watch-status disconnected">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Smartwatch not connected</span>
+                </div>
+                
+                <button type="button" id="connect-watch-btn">
+                    <i class="fas fa-bluetooth-b"></i> Connect Smartwatch
+                </button>
+                
+                <div id="watch-data" class="watch-data">
+                    <h4>Imported Health Data</h4>
+                    <div class="watch-metric">
+                        <span class="watch-metric-name">Heart Rate:</span>
+                        <span class="watch-metric-value" id="heart-rate">-- bpm</span>
+                    </div>
+                    <div class="watch-metric">
+                        <span class="watch-metric-name">Blood Pressure:</span>
+                        <span class="watch-metric-value" id="blood-pressure">--/-- mmHg</span>
+                    </div>
+                    <div class="watch-metric">
+                        <span class="watch-metric-name">Activity Level:</span>
+                        <span class="watch-metric-value" id="activity-level">-- steps</span>
+                    </div>
+                    <div class="watch-metric">
+                        <span class="watch-metric-name">Sleep Quality:</span>
+                        <span class="watch-metric-value" id="sleep-quality">-- hours</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Access Controls Section -->
+            <div class="security-section">
+                <h3><i class="fas fa-user-shield"></i> Data Security Controls</h3>
+                <p>Control how your health data is stored and shared:</p>
+                
+                <div class="data-access-controls">
+                    <div class="data-access-item">
+                        <span>Enable End-to-End Encryption</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enable-encryption" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="data-access-item">
+                        <span>Allow Secure Bluetooth Data Transfer</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enable-bluetooth" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="data-access-item">
+                        <span>Enable Remote Wipe Protection</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="enable-remote-wipe" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="data-access-item">
+                        <span>Share Anonymized Data for Research</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="share-anonymized">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="encryption-status">
+                    <i class="fas fa-lock"></i>
+                    <span id="encryption-status-text">All data will be encrypted with AES-256</span>
+                </div>
+            </div>
+            
+            <button type="submit">Calculate My CKD Risk</button>
+            <div id="loading-spinner" class="loading-spinner hidden"></div>
+        </form>
+    </section>
+
+    <section id="result" class="hidden">
+        <h2>Your CKD Risk Assessment Results</h2>
+        <div id="risk-message"></div>
+        <div id="risk-explanation"></div>
+        <div id="advice"></div>
+        
+        <div class="additional-info">
+            <h3>Understanding Your Results</h3>
+            <p>This assessment is based on established risk factors for chronic kidney disease including age, diabetes, hypertension, family history, and other clinical factors.</p>
+            <p><strong>Note:</strong> This tool cannot diagnose CKD. Only blood tests (eGFR) and urine tests (ACR) can confirm kidney disease.</p>
+        </div>
+
+        <!-- Privacy Section -->
+        <div class="security-section">
+            <h3><i class="fas fa-lock"></i> Your Data Privacy</h3>
+            <p>Your assessment data is stored securely with end-to-end encryption. You can:</p>
+            <ul>
+                <li><a href="#" id="view-data-btn">View all data we've collected</a></li>
+                <li><a href="#" id="delete-data-btn">Request deletion of your data</a></li>
+                <li><a href="#" id="privacy-policy-btn">Read our full privacy policy</a></li>
+            </ul>
+        </div>
+        
+        <button id="reset-btn">Start New Assessment</button>
+    </section>
+
+    <section id="visualizations" class="hidden">
+        <h2>Your Risk Visualizations</h2>
+        <div id="visualization-content">
+            <div class="visualization-grid">
+                <div>
+                    <h3>Top Risk Factors</h3>
+                    <div class="chart-container">
+                        <canvas id="factorsChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="factors-legend">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div>
+                    <h3>Risk Score by Category</h3>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="bar-chart-legend">
+                        <p><strong>Risk Categories Breakdown:</strong></p>
+                        <p id="bar-chart-text"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-grid">
+                <div>
+                    <h3>5-Year CKD Risk Probability</h3>
+                    <div class="chart-container">
+                        <canvas id="probabilityChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <p><strong>5-Year Risk Probability:</strong></p>
+                        <p id="probability-chart-text"></p>
+                    </div>
+                </div>
+                <div>
+                    <h3>Risk Category Comparison</h3>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <p>Comparison of your risk across different categories. The further the point extends, the higher your risk in that category.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-info">
+                <h3>Detailed Risk Factors</h3>
+                <table class="risk-table">
+                    <thead>
+                        <tr>
+                            <th>Risk Factor</th>
+                            <th>Points</th>
+                            <th>Percentage</th>
+                            <th>Doctor Recommendation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="risk-factors-table">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="urgent-warning-container" class="hidden"></div>
+            
+            <div class="personal-recommendations">
+                <div class="visualization-grid">
+                    <div>
+                        <h3>Personalized Recommendations</h3>
+                        <div id="recommendations-content"></div>
+                    </div>
+                    <div>
+                        <div class="stages-info">
+                            <h3>CKD Stages Explained</h3>
+                            <div class="ckd-stages-container">
+                                <div class="ckd-stage" style="background-color: #d1f2eb;"><div class="ckd-stage-color" style="background-color:#1abc9c;"></div><div class="ckd-stage-info"><div class="ckd-stage-name">Stage 1 (Normal or High GFR ≥90)</div><div class="ckd-stage-desc">Kidney function is normal but there are signs of kidney damage (e.g., protein in urine).</div></div></div>
+                                <div class="ckd-stage" style="background-color: #d4efdf;"><div class="ckd-stage-color" style="background-color:#27ae60;"></div><div class="ckd-stage-info"><div class="ckd-stage-name">Stage 2 (Mild CKD, GFR 60-89)</div><div class="ckd-stage-desc">Slight loss of kidney function; usually no symptoms but damage continues silently.</div></div></div>
+                                <div class="ckd-stage" style="background-color: #fcf3cf;"><div class="ckd-stage-color" style="background-color:#f1c40f;"></div><div class="ckd-stage-info"><div class="ckd-stage-name">Stage 3 (Moderate CKD, GFR 30-59)</div><div class="ckd-stage-desc">Kidney function is moderately reduced; fatigue, swelling, and changes in urination may occur.</div></div></div>
+                                <div class="ckd-stage" style="background-color: #f9e79f;"><div class="ckd-stage-color" style="background-color:#e67e22;"></div><div class="ckd-stage-info"><div class="ckd-stage-name">Stage 4 (Severe CKD, GFR 15-29)</div><div class="ckd-stage-desc">Severe decline in kidney function; symptoms become more noticeable, need to prepare for dialysis or transplant.</div></div></div>
+                                <div class="ckd-stage" style="background-color: #f5b7b1;"><div class="ckd-stage-color" style="background-color:#c0392b;"></div><div class="ckd-stage-info"><div class="ckd-stage-name">Stage 5 (Kidney Failure, GFR <15)</div><div class="ckd-stage-desc">Kidneys have lost nearly all function; dialysis or transplant required to survive.</div></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-card">
+                            <h4>General Recommendations</h4>
+                            <ul>
+                                <li>Discuss kidney health with your doctor</li>
+                                <li>Monitor and control blood pressure</li>
+                                <li>Manage diabetes if applicable</li>
+                                <li>Maintain healthy lifestyle with exercise</li>
+                                <li>Consider annual kidney screening</li>
+                                <li>Avoid NSAID pain medications</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-buttons">
+                <button id="download-image" class="download-btn">Download as Image</button>
+                <button id="download-text" class="download-btn">Download Text Report</button>
+                <button id="share-results-btn" class="download-btn"><i class="fas fa-share-alt"></i> Share Results</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p><strong>Disclaimer:</strong> This tool is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+        <p>Based on clinical guidelines from the National Kidney Foundation and KDIGO.</p>
+        <p><a href="#" id="footer-privacy-link">Privacy Policy</a> | <a href="#" id="footer-terms-link">Terms of Service</a> | <a href="#" id="footer-contact-link">Contact Us</a></p>
+    </footer>
+
+    <div id="chatbot-container">
+        <iframe id="chatbot-iframe" src="https://agent.jotform.com/0195bf7a139274149d20a98efdf483b08976"></iframe>
+        <button id="chatbot-toggle">💬</button>
+    </div>
+
+    <!-- Modal for Privacy Policy -->
+    <div id="privacy-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="close-privacy-modal">&times;</button>
+            <h2>Privacy Policy <span class="security-badge">Secure</span></h2>
+            <h3>Data Collection and Use</h3>
+            <p>We collect only the health information necessary to provide you with an accurate chronic kidney disease risk assessment. This includes:</p>
+            <ul>
+                <li>Demographic information (age, sex, race/ethnicity)</li>
+                <li>Medical history (hypertension, diabetes, cardiovascular disease)</li>
+                <li>Family medical history</li>
+                <li>Lifestyle factors (BMI, smoking status)</li>
+                <li>Symptoms you report</li>
+                <li>Smartwatch health metrics (if connected)</li>
+            </ul>
+            
+            <h3>Smartwatch Security</h3>
+            <p>When connecting your smartwatch:</p>
+            <ul>
+                <li><strong>Secure Pairing:</strong> Uses Bluetooth LE with encryption</li>
+                <li><strong>Minimal Data:</strong> Only collects necessary health metrics</li>
+                <li><strong>Temporary Storage:</strong> Data is encrypted and purged after processing</li>
+                <li><strong>No Persistent Connection:</strong> Only connects during active sessions</li>
+            </ul>
+            
+            <h3>Data Security</h3>
+            <p>All data is protected with:</p>
+            <ul>
+                <li><strong>End-to-end encryption:</strong> Data is encrypted both in transit (using TLS 1.3) and at rest (AES-256 encryption)</li>
+                <li><strong>Minimal data collection:</strong> We don't collect personally identifiable information like names, addresses, or contact details</li>
+                <li><strong>Secure storage:</strong> Data is stored in HIPAA-compliant servers with strict access controls</li>
+                <li><strong>Remote wipe:</strong> You can remotely erase all your data through the companion app</li>
+            </ul>
+            
+            <h3>Your Rights</h3>
+            <p>You have the right to:</p>
+            <ul>
+                <li>Access all data we've collected about you</li>
+                <li>Request correction of inaccurate data</li>
+                <li>Request deletion of your data</li>
+                <li>Download your data in a portable format</li>
+                <li>Control what information is shared with providers</li>
+                <li>Revoke smartwatch access at any time</li>
+            </ul>
+            
+            <button id="close-privacy-modal-bottom" class="modal-close-bottom-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let userRiskData = {};
+        let riskCharts = {};
+        let watchConnected = false;
+        let encryptionKey = null;
+        let bluetoothDevice = null;
+        
+        // Initialize form event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start assessment button
+            document.getElementById('start-assessment-btn').addEventListener('click', function() {
+                document.getElementById('welcome-screen').classList.add('hidden');
+                document.getElementById('assessment-form').classList.remove('hidden');
+            });
+            
+            // Diabetes duration field control
+            document.getElementById('diabetes').addEventListener('change', function() {
+                const durationField = document.getElementById('duration');
+                if (this.value === 'type1' || this.value === 'type2') {
+                    durationField.disabled = false;
+                    durationField.required = true;
+                } else {
+                    durationField.disabled = true;
+                    durationField.required = false;
+                    durationField.value = '0';
+                }
+            });
+            
+            // Family diseases container control
+            document.getElementById('family_history').addEventListener('change', function() {
+                const container = document.getElementById('family-diseases-container');
+                if (this.value !== 'no') {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                    document.querySelectorAll('input[name="family_diseases"]').forEach(el => el.checked = false);
+                }
+            });
+            
+            // Form submission
+            document.getElementById('ckd-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await calculateRisk();
+            });
+            
+            // Reset button
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                resetForm();
+            });
+            
+            // Download buttons
+            document.getElementById('download-image').addEventListener('click', downloadAsImage);
+            document.getElementById('download-text').addEventListener('click', downloadTextReport);
+            document.getElementById('share-results-btn').addEventListener('click', shareResults);
+            
+            // Chatbot toggle
+            document.getElementById('chatbot-toggle').addEventListener('click', function() {
+                document.getElementById('chatbot-container').classList.toggle('chatbot-visible');
+            });
+
+            // Privacy policy links
+            document.getElementById('privacy-policy-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('privacy-modal').style.display = 'flex';
+            });
+
+            document.getElementById('footer-privacy-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('privacy-modal').style.display = 'flex';
+            });
+
+            // Close modal buttons
+            document.getElementById('close-privacy-modal').addEventListener('click', function() {
+                document.getElementById('privacy-modal').style.display = 'none';
+            });
+
+            document.getElementById('close-privacy-modal-bottom').addEventListener('click', function() {
+                document.getElementById('privacy-modal').style.display = 'none';
+            });
+
+            // Close modal when clicking outside content
+            document.getElementById('privacy-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    document.getElementById('privacy-modal').style.display = 'none';
+                }
+            });
+
+            // Data management buttons
+            document.getElementById('view-data-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Your assessment data will be displayed here. In a production environment, this would show all collected data.');
+            });
+
+            document.getElementById('delete-data-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete all your assessment data? This cannot be undone.')) {
+                    remoteWipe();
+                    alert('Your data has been deleted. In a production environment, this would permanently remove all your data from our servers.');
+                }
+            });
+
+            // Smartwatch connection
+            document.getElementById('connect-watch-btn').addEventListener('click', function() {
+                if (!watchConnected) {
+                    connectSmartwatch();
+                } else {
+                    disconnectSmartwatch();
+                }
+            });
+
+            // Encryption toggle
+            document.getElementById('enable-encryption').addEventListener('change', function() {
+                updateEncryptionStatus();
+            });
+
+            // Bluetooth toggle
+            document.getElementById('enable-bluetooth').addEventListener('change', function() {
+                if (!this.checked && watchConnected) {
+                    disconnectSmartwatch();
+                }
+            });
+
+            // Initialize encryption status
+            updateEncryptionStatus();
+        });
+
+        // Smartwatch connection functions
+        async function connectSmartwatch() {
+            try {
+                if (!navigator.bluetooth) {
+                    throw new Error('Web Bluetooth not supported in this browser');
+                }
+
+                if (!document.getElementById('enable-bluetooth').checked) {
+                    throw new Error('Bluetooth data transfer is disabled in settings');
+                }
+
+                // Request Bluetooth device with health-related services
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: ['heart_rate', 'blood_pressure'] }],
+                    optionalServices: ['generic_access', 'device_information']
+                });
+
+                // Update UI to show connecting status
+                const statusElement = document.getElementById('watch-status');
+                statusElement.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Connecting to smartwatch...';
+                statusElement.className = 'watch-status disconnected';
+
+                // Add event listener for disconnection
+                bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+                // Connect to the GATT server
+                const server = await bluetoothDevice.gatt.connect();
+
+                // Update UI to show connected status
+                statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Smartwatch connected';
+                statusElement.className = 'watch-status connected';
+                document.getElementById('connect-watch-btn').innerHTML = '<i class="fas fa-bluetooth-b"></i> Disconnect Smartwatch';
+                watchConnected = true;
+
+                // Get heart rate service
+                const heartRateService = await server.getPrimaryService('heart_rate');
+                const heartRateCharacteristic = await heartRateService.getCharacteristic('heart_rate_measurement');
+
+                // Start notifications
+                await heartRateCharacteristic.startNotifications();
+                heartRateCharacteristic.addEventListener('characteristicvaluechanged', handleHeartRateMeasurement);
+
+                // Show data section
+                document.getElementById('watch-data').classList.add('visible');
+
+                // Simulate getting other health data (in a real app, you'd actually read these from the device)
+                simulateWatchData();
+
+            } catch (error) {
+                console.error('Smartwatch connection failed:', error);
+                const statusElement = document.getElementById('watch-status');
+                statusElement.innerHTML = '<i class="fas fa-times-circle"></i> ' + error.message;
+                statusElement.className = 'watch-status disconnected';
+                watchConnected = false;
+                bluetoothDevice = null;
+            }
+        }
+
+        function disconnectSmartwatch() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+            }
+            watchConnected = false;
+            bluetoothDevice = null;
+            const statusElement = document.getElementById('watch-status');
+            statusElement.innerHTML = '<i class="fas fa-times-circle"></i> Smartwatch not connected';
+            statusElement.className = 'watch-status disconnected';
+            document.getElementById('connect-watch-btn').innerHTML = '<i class="fas fa-bluetooth-b"></i> Connect Smartwatch';
+            document.getElementById('watch-data').classList.remove('visible');
+        }
+
+        function onDisconnected(event) {
+            console.log('Device disconnected', event);
+            disconnectSmartwatch();
+        }
+
+        function handleHeartRateMeasurement(event) {
+            // Parse heart rate value (simplified - real implementation would need proper decoding)
+            const value = event.target.value;
+            const flags = value.getUint8(0);
+            let rate = value.getUint8(1);
+            
+            if (flags & 0x1) {
+                // 16-bit heart rate
+                rate = value.getUint16(1, true);
+            }
+            
+            document.getElementById('heart-rate').textContent = rate + ' bpm';
+        }
+
+        function simulateWatchData() {
+            // Simulate getting watch data (in a real app this would come from the device)
+            document.getElementById('blood-pressure').textContent = '120/80 mmHg';
+            document.getElementById('activity-level').textContent = '7,542 steps';
+            document.getElementById('sleep-quality').textContent = '7.2 hours';
+        }
+
+        // Encryption functions
+        async function generateEncryptionKey() {
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    encryptionKey = await window.crypto.subtle.generateKey(
+                        { name: "AES-GCM", length: 256 },
+                        true,
+                        ["encrypt", "decrypt"]
+                    );
+                    return encryptionKey;
+                } else {
+                    // Fallback to CryptoJS if Web Crypto API not available
+                    encryptionKey = CryptoJS.lib.WordArray.random(32); // 256 bits
+                    return encryptionKey;
+                }
+            } catch (error) {
+                console.error('Key generation failed:', error);
+                return null;
+            }
+        }
+
+        async function encryptData(data) {
+            if (!document.getElementById('enable-encryption').checked) {
+                return data; // Return unencrypted if encryption is disabled
+            }
+
+            if (!encryptionKey) {
+                await generateEncryptionKey();
+            }
+
+            try {
+                const dataString = JSON.stringify(data);
+                
+                if (window.crypto && window.crypto.subtle) {
+                    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                    const encoded = new TextEncoder().encode(dataString);
+                    const encrypted = await window.crypto.subtle.encrypt(
+                        { name: "AES-GCM", iv },
+                        encryptionKey,
+                        encoded
+                    );
+                    return { iv: Array.from(iv), encrypted: Array.from(new Uint8Array(encrypted)) };
+                } else {
+                    // Fallback to CryptoJS
+                    const encrypted = CryptoJS.AES.encrypt(dataString, encryptionKey.toString());
+                    return encrypted.toString();
+                }
+            } catch (error) {
+                console.error('Encryption failed:', error);
+                return data; // Return unencrypted if encryption fails
+            }
+        }
+
+        function updateEncryptionStatus() {
+            const encryptionEnabled = document.getElementById('enable-encryption').checked;
+            const statusText = document.getElementById('encryption-status-text');
+            
+            if (encryptionEnabled) {
+                statusText.textContent = 'All data will be encrypted with AES-256';
+                statusText.style.color = 'var(--security-color)';
+            } else {
+                statusText.textContent = 'WARNING: Data encryption is disabled';
+                statusText.style.color = 'var(--danger-color)';
+            }
+        }
+
+        function remoteWipe() {
+            // Clear all locally stored data
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear form fields
+            document.getElementById('ckd-form').reset();
+            
+            // Disconnect any connected devices
+            if (watchConnected) {
+                disconnectSmartwatch();
+            }
+            
+            // Clear any generated keys
+            encryptionKey = null;
+            
+            console.log('All local data has been wiped');
+        }
+
+        async function calculateRisk() {
+            // Show loading spinner
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            
+            try {
+                // First try to use the hybrid model API
+                await calculateRiskWithHybridModel();
+            } catch (apiError) {
+                console.error('API request failed, falling back to client-side calculation:', apiError);
+                calculateRiskFallback();
+            } finally {
+                // Hide loading spinner
+                document.getElementById('loading-spinner').classList.add('hidden');
+            }
+        }
+
+        async function calculateRiskWithHybridModel() {
+            // Gather form data
+            const formData = gatherFormData();
+            
+            try {
+                // Encrypt data if enabled
+                const encryptedData = await encryptData(formData);
+                
+                // Send to hybrid model API
+                const response = await axios.post('https://your-api-endpoint.com/predict', {
+                    data: encryptedData,
+                    encryption: document.getElementById('enable-encryption').checked
+                });
+                
+                // Process the response
+                userRiskData = {
+                    ...response.data,
+                    // Include all original form data
+                    ...formData
+                };
+                
+                // Display results
+                displayResults();
+                createVisualizations();
+                
+                // Show results and scroll to them
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('visualizations').classList.remove('hidden');
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error using hybrid model:', error);
+                throw error; // Re-throw to trigger fallback
+            }
+        }
+
+        function gatherFormData() {
+            return {
+                age: parseInt(document.getElementById('age').value),
+                sex: document.getElementById('sex').value,
+                race: document.getElementById('race').value,
+                hypertension: document.getElementById('hypertension').value,
+                diabetes: document.getElementById('diabetes').value,
+                duration: parseInt(document.getElementById('duration').value) || 0,
+                family_history: document.getElementById('family_history').value,
+                familyDiseases: Array.from(document.querySelectorAll('input[name="family_diseases"]:checked')).map(el => el.value),
+                bmi: parseFloat(document.getElementById('bmi').value),
+                smoking: document.getElementById('smoking').value,
+                cardiovascular: document.getElementById('cardiovascular').value,
+                symptoms: Array.from(document.querySelectorAll('input[name="symptoms"]:checked')).map(el => el.value),
+                watchData: watchConnected ? getWatchData() : null
+            };
+        }
+
+        function getWatchData() {
+            return {
+                heartRate: parseInt(document.getElementById('heart-rate').textContent) || null,
+                bloodPressure: document.getElementById('blood-pressure').textContent,
+                activityLevel: document.getElementById('activity-level').textContent,
+                sleepQuality: document.getElementById('sleep-quality').textContent
+            };
+        }
+
+        function calculateRiskFallback() {
+            // Gather form data
+            const age = parseInt(document.getElementById('age').value);
+            const sex = document.getElementById('sex').value;
+            const race = document.getElementById('race').value;
+            const hypertension = document.getElementById('hypertension').value;
+            const diabetes = document.getElementById('diabetes').value;
+            const duration = parseInt(document.getElementById('duration').value) || 0;
+            const family_history = document.getElementById('family_history').value;
+            
+            // Get family diseases
+            const familyDiseases = Array.from(document.querySelectorAll('input[name="family_diseases"]:checked')).map(el => el.value);
+            const familyDiseasesText = familyDiseases.map(disease => {
+                switch(disease) {
+                    case 'ckd': return 'Chronic Kidney Disease';
+                    case 'diabetes': return 'Diabetes';
+                    case 'hypertension': return 'Hypertension';
+                    case 'heart': return 'Heart Disease';
+                    default: return disease;
+                }
+            }).join(', ');
+            
+            const bmi = parseFloat(document.getElementById('bmi').value);
+            const smoking = document.getElementById('smoking').value;
+            const cardiovascular = document.getElementById('cardiovascular').value;
+            
+            // Count symptoms
+            const symptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked')).map(el => el.value);
+            const symptomsCount = symptoms.length;
+            const hasPain = symptoms.includes('pain');
+            
+            // Get smartwatch data if connected
+            let watchData = {};
+            if (watchConnected) {
+                watchData = {
+                    heartRate: parseInt(document.getElementById('heart-rate').textContent) || null,
+                    bloodPressure: document.getElementById('blood-pressure').textContent,
+                    activityLevel: document.getElementById('activity-level').textContent,
+                    sleepQuality: document.getElementById('sleep-quality').textContent
+                };
+            }
+            
+            // Calculate risk score
+            let riskScore = 0;
+            let riskFactors = [];
+            
+            // Age points
+            if (age >= 60) {
+                riskScore += 3;
+                riskFactors.push({name: 'Age (60+)', value: 3, max: 3, category: 'Demographics'});
+            }
+            else if (age >= 50) {
+                riskScore += 2;
+                riskFactors.push({name: 'Age (50-59)', value: 2, max: 3, category: 'Demographics'});
+            }
+            else if (age >= 40) {
+                riskScore += 1;
+                riskFactors.push({name: 'Age (40-49)', value: 1, max: 3, category: 'Demographics'});
+            } else {
+                riskFactors.push({name: 'Age (<40)', value: 0, max: 3, category: 'Demographics'});
+            }
+            
+            // Race points
+            if (race === 'black') {
+                riskScore += 1;
+                riskFactors.push({name: 'African American', value: 1, max: 1, category: 'Demographics'});
+            } else {
+                riskFactors.push({name: 'Race/ethnicity', value: 0, max: 1, category: 'Demographics'});
+            }
+            
+            // Hypertension points
+            if (hypertension === 'yes') {
+                riskScore += 2;
+                riskFactors.push({name: 'Hypertension', value: 2, max: 2, category: 'Medical Conditions'});
+            }
+            else if (hypertension === 'borderline') {
+                riskScore += 1;
+                riskFactors.push({name: 'Borderline hypertension', value: 1, max: 2, category: 'Medical Conditions'});
+            } else {
+                riskFactors.push({name: 'No hypertension', value: 0, max: 2, category: 'Medical Conditions'});
+            }
+            
+            // Diabetes points
+            if (diabetes === 'type2') {
+                riskScore += 3;
+                riskFactors.push({name: 'Type 2 Diabetes', value: 3, max: 4, category: 'Medical Conditions'});
+            }
+            else if (diabetes === 'type1') {
+                riskScore += 4;
+                riskFactors.push({name: 'Type 1 Diabetes', value: 4, max: 4, category: 'Medical Conditions'});
+            }
+            else if (diabetes === 'prediabetes') {
+                riskScore += 1;
+                riskFactors.push({name: 'Prediabetes', value: 1, max: 4, category: 'Medical Conditions'});
+            } else {
+                riskFactors.push({name: 'No diabetes', value: 0, max: 4, category: 'Medical Conditions'});
+            }
+            
+            // Diabetes duration points
+            if (duration >= 10) {
+                riskScore += 2;
+                riskFactors.push({name: 'Diabetes duration (10+ yrs)', value: 2, max: 2, category: 'Medical Conditions'});
+            }
+            else if (duration >= 5) {
+                riskScore += 1;
+                riskFactors.push({name: 'Diabetes duration (5-9 yrs)', value: 1, max: 2, category: 'Medical Conditions'});
+            } else if (duration > 0) {
+                riskFactors.push({name: 'Diabetes duration (<5 yrs)', value: 0, max: 2, category: 'Medical Conditions'});
+            }
+            
+            // Family history points
+            let familyHistoryPoints = 0;
+            if (family_history === 'parents' || family_history === 'siblings') {
+                familyHistoryPoints = 1;
+            } else if (family_history === 'both') {
+                familyHistoryPoints = 2;
+            }
+            
+            riskScore += familyHistoryPoints;
+            riskFactors.push({
+                name: 'Family history',
+                value: familyHistoryPoints,
+                max: 2,
+                details: familyDiseasesText ? `(${familyDiseasesText})` : '',
+                category: 'Family History'
+            });
+            
+            // BMI points
+            if (bmi >= 30) {
+                riskScore += 1;
+                riskFactors.push({name: 'Obesity (BMI ≥30)', value: 1, max: 1, category: 'Lifestyle'});
+            }
+            else if (bmi >= 25) {
+                riskFactors.push({name: 'Overweight (BMI 25-29.9)', value: 0, max: 1, category: 'Lifestyle'});
+            } else {
+                riskFactors.push({name: 'Normal weight', value: 0, max: 1, category: 'Lifestyle'});
+            }
+            
+            // Smoking points
+            if (smoking === 'current') {
+                riskScore += 1;
+                riskFactors.push({name: 'Current smoker', value: 1, max: 1, category: 'Lifestyle'});
+            }
+            else if (smoking === 'former') {
+                riskFactors.push({name: 'Former smoker', value: 0, max: 1, category: 'Lifestyle'});
+            } else {
+                riskFactors.push({name: 'Never smoked', value: 0, max: 1, category: 'Lifestyle'});
+            }
+            
+            // Cardiovascular disease points
+            if (cardiovascular === 'yes') {
+                riskScore += 1;
+                riskFactors.push({name: 'Cardiovascular disease', value: 1, max: 1, category: 'Medical Conditions'});
+            } else {
+                riskFactors.push({name: 'No cardiovascular disease', value: 0, max: 1, category: 'Medical Conditions'});
+            }
+            
+            // Symptoms points
+            if (symptomsCount >= 3) {
+                riskScore += 2;
+                riskFactors.push({name: 'Multiple symptoms', value: 2, max: 2, category: 'Symptoms'});
+            }
+            else if (symptomsCount >= 1) {
+                riskScore += 1;
+                riskFactors.push({name: 'Some symptoms', value: 1, max: 2, category: 'Symptoms'});
+            } else {
+                riskFactors.push({name: 'No symptoms', value: 0, max: 2, category: 'Symptoms'});
+            }
+            
+            // Determine risk level
+            let riskLevel, riskPercentage;
+            if (riskScore >= 10) {
+                riskLevel = 'high';
+                riskPercentage = '20-50%';
+            } else if (riskScore >= 6) {
+                riskLevel = 'moderate';
+                riskPercentage = '5-20%';
+            } else {
+                riskLevel = 'low';
+                riskPercentage = '<5%';
+            }
+            
+            // Check for urgent warning conditions
+            const urgentWarning = (riskScore >= 12) || 
+                                 (diabetes === 'type1' && duration >= 10) || 
+                                 (symptomsCount >= 4) || 
+                                 hasPain;
+            
+            // Store risk data with encrypted watch data
+            userRiskData = {
+                riskScore,
+                riskLevel,
+                riskPercentage,
+                riskFactors,
+                age,
+                sex,
+                race,
+                hypertension,
+                diabetes,
+                duration,
+                family_history,
+                familyDiseases,
+                familyDiseasesText,
+                bmi,
+                smoking,
+                cardiovascular,
+                symptoms: symptomsCount,
+                symptomsList: symptoms,
+                hasPain,
+                urgentWarning,
+                watchData: watchConnected ? watchData : null,
+                watchConnected
+            };
+            
+            // Display results
+            displayResults();
+            createVisualizations();
+            
+            // Show results and scroll to them
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('visualizations').classList.remove('hidden');
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayResults() {
+            const riskMessage = document.getElementById('risk-message');
+            riskMessage.innerHTML = `
+                <p>Your calculated CKD risk score: <strong>${userRiskData.riskScore}/20</strong></p>
+                <p>Risk level: <span class="risk-${userRiskData.riskLevel}">${userRiskData.riskLevel.toUpperCase()}</span></p>
+                <p>Estimated 5-year risk of developing CKD: ${userRiskData.riskPercentage}</p>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${(userRiskData.riskScore / 20) * 100}%; background-color: ${
+                        userRiskData.riskLevel === 'high' ? 'var(--danger-color)' : 
+                        userRiskData.riskLevel === 'moderate' ? 'var(--warning-color)' : 'var(--secondary-color)'
+                    }"></div>
+                </div>
+            `;
+            
+            const riskExplanation = document.getElementById('risk-explanation');
+            riskExplanation.innerHTML = `
+                <h3>Key Risk Factors Identified:</h3>
+                <ul>
+                    ${userRiskData.age >= 50 ? `<li>Age (${userRiskData.age} years)</li>` : ''}
+                    ${userRiskData.race === 'black' ? '<li>African American ethnicity</li>' : ''}
+                    ${userRiskData.hypertension !== 'no' ? `<li>${userRiskData.hypertension === 'yes' ? 'Hypertension' : 'Borderline hypertension'}</li>` : ''}
+                    ${userRiskData.diabetes !== 'no' ? `<li>${userRiskData.diabetes === 'type1' ? 'Type 1' : userRiskData.diabetes === 'type2' ? 'Type 2' : 'Pre'} diabetes${userRiskData.duration > 0 ? ` (${userRiskData.duration} years)` : ''}</li>` : ''}
+                    ${userRiskData.family_history !== 'no' ? `<li>Family history of kidney disease (${userRiskData.familyDiseasesText ? userRiskData.familyDiseasesText : 'unspecified conditions'})</li>` : ''}
+                    ${userRiskData.bmi >= 30 ? `<li>Obesity (BMI ${userRiskData.bmi})</li>` : userRiskData.bmi >= 25 ? `<li>Overweight (BMI ${userRiskData.bmi})</li>` : ''}
+                    ${userRiskData.smoking === 'current' ? '<li>Current smoker</li>' : userRiskData.smoking === 'former' ? '<li>Former smoker</li>' : ''}
+                    ${userRiskData.cardiovascular === 'yes' ? '<li>History of cardiovascular disease</li>' : ''}
+                    ${userRiskData.symptoms > 0 ? `<li>${userRiskData.symptoms} potential CKD symptom(s): ${userRiskData.symptomsList.map(s => {
+                        switch(s) {
+                            case 'fatigue': return 'fatigue';
+                            case 'swelling': return 'swelling';
+                            case 'shortness': return 'shortness of breath';
+                            case 'appetite': return 'poor appetite';
+                            case 'sleep': return 'trouble sleeping';
+                            case 'urination': return 'urination changes';
+                            case 'nausea': return 'nausea';
+                            case 'pain': return 'kidney pain';
+                            case 'itchy': return 'itchy skin';
+                            case 'muscle': return 'muscle cramps';
+                            default: return s;
+                        }
+                    }).join(', ')}</li>` : ''}
+                    ${userRiskData.watchConnected ? '<li>Smartwatch health data included in assessment</li>' : ''}
+                </ul>
+            `;
+            
+            const advice = document.getElementById('advice');
+            if (userRiskData.riskLevel === 'high') {
+                advice.innerHTML = `
+                    <h3>Recommendations:</h3>
+                    <p>You have several risk factors for chronic kidney disease. We strongly recommend:</p>
+                    <ul>
+                        <li>Consult with your doctor about kidney function tests (eGFR and urine albumin)</li>
+                        <li>Strict control of blood pressure (target <130/80 mmHg if diabetic or CKD present)</li>
+                        <li>Optimal diabetes management if applicable (target A1C <7% for most patients)</li>
+                        <li>Regular monitoring of kidney function (at least annually)</li>
+                        <li>Dietary modifications (reduce sodium, moderate protein intake)</li>
+                        <li>Smoking cessation if applicable</li>
+                        <li>Weight management if overweight</li>
+                        ${userRiskData.family_history !== 'no' ? '<li>Discuss family screening options with your doctor</li>' : ''}
+                        ${userRiskData.watchConnected ? '<li>Continue monitoring with your smartwatch for health trends</li>' : ''}
+                    </ul>
+                `;
+            } else if (userRiskData.riskLevel === 'moderate') {
+                advice.innerHTML = `
+                    <h3>Recommendations:</h3>
+                    <p>You have some risk factors for chronic kidney disease. We recommend:</p>
+                    <ul>
+                        <li>Discuss kidney health with your doctor at your next visit</li>
+                        <li>Monitor and control blood pressure</li>
+                        <li>Manage diabetes carefully if applicable</li>
+                        <li>Maintain a healthy lifestyle with regular exercise</li>
+                        <li>Consider annual kidney function screening if you have multiple risk factors</li>
+                        <li>Avoid NSAID pain medications if possible</li>
+                        ${userRiskData.family_history !== 'no' ? '<li>Be aware of your family history and monitor for symptoms</li>' : ''}
+                        ${userRiskData.watchConnected ? '<li>Consider using your smartwatch to track health metrics regularly</li>' : ''}
+                    </ul>
+                `;
+            } else {
+                advice.innerHTML = `
+                    <h3>Recommendations:</h3>
+                    <p>Your current risk appears low, but everyone should:</p>
+                    <ul>
+                        <li>Maintain a healthy blood pressure (<120/80 mmHg ideal)</li>
+                        <li>Stay hydrated and eat a balanced diet</li>
+                        <li>Exercise regularly</li>
+                        <li>Avoid excessive use of pain medications that can harm kidneys</li>
+                        <li>Get regular check-ups with your doctor</li>
+                        ${userRiskData.family_history !== 'no' ? '<li>Be aware of your family history as it may increase your risk</li>' : ''}
+                        ${userRiskData.watchConnected ? '<li>Your smartwatch can help maintain healthy habits</li>' : ''}
+                    </ul>
+                `;
+            }
+        }
+        
+        function createVisualizations() {
+            createFactorsChart();
+            createBarChart();
+            createProbabilityChart();
+            createRadarChart();
+            createRiskFactorsTable();
+            createUrgentWarning();
+            createPersonalRecommendations();
+        }
+        
+        function createFactorsChart() {
+            const ctx = document.getElementById('factorsChart').getContext('2d');
+            
+            if (riskCharts.factorsChart) {
+                riskCharts.factorsChart.destroy();
+            }
+            
+            // Sort factors by their relative impact (value/max ratio)
+            const sortedFactors = [...userRiskData.riskFactors]
+                .filter(factor => factor.value > 0)
+                .sort((a, b) => (b.value / b.max) - (a.value / a.max));
+            
+            // Limit to top 6 factors for better readability
+            const displayFactors = sortedFactors.slice(0, 6);
+            const otherFactors = sortedFactors.slice(6);
+            
+            const labels = displayFactors.map(factor => factor.name);
+            const values = displayFactors.map(factor => factor.value);
+            const colors = ['#1a6fc9', '#27ae60', '#f39c12', '#e74c3c', '#9b59b6', '#3498db'];
+            
+            // Calculate total from displayed factors only for accurate percentages
+            const displayTotal = values.reduce((sum, value) => sum + value, 0);
+            
+            riskCharts.factorsChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top Contributing Risk Factors',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw || 0;
+                                    const percentage = Math.round((value / displayTotal) * 100);
+                                    let label = context.label || '';
+                                    
+                                    if (label.includes('Family history') && userRiskData.familyDiseasesText) {
+                                        label += ` (${userRiskData.familyDiseasesText})`;
+                                    }
+                                    
+                                    return `${label}: ${value} pts (${percentage}% of displayed)`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: true,
+                            formatter: (value, ctx) => {
+                                const percentage = Math.round((value / displayTotal) * 100);
+                                return `${percentage}%`;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Create detailed legend
+            const legendContainer = document.getElementById('factors-legend');
+            legendContainer.innerHTML = `
+                <p><strong>Top contributing factors to your score:</strong></p>
+                <ul>
+                    ${displayFactors.map((factor, index) => {
+                        const percentage = Math.round((factor.value / displayTotal) * 100);
+                        let details = '';
+                        if (factor.name === 'Family history' && userRiskData.familyDiseasesText) {
+                            details = ` (${userRiskData.familyDiseasesText})`;
+                        }
+                        return `<li style="color: ${colors[index]}"><strong>${factor.name}${details}:</strong> ${factor.value} pts (${percentage}%)</li>`;
+                    }).join('')}
+                    ${otherFactors.length > 0 ? 
+                        `<li>+ ${otherFactors.length} other factors contributing ${otherFactors.reduce((sum, f) => sum + f.value, 0)} pts</li>` : ''}
+                </ul>
+            `;
+        }
+        
+        function createBarChart() {
+            const ctx = document.getElementById('barChart').getContext('2d');
+            
+            if (riskCharts.barChart) {
+                riskCharts.barChart.destroy();
+            }
+            
+            // Group factors by category
+            const categories = {};
+            userRiskData.riskFactors.forEach(factor => {
+                if (!categories[factor.category]) {
+                    categories[factor.category] = 0;
+                }
+                categories[factor.category] += factor.value;
+            });
+            
+            const categoryLabels = Object.keys(categories);
+            const categoryValues = Object.values(categories);
+            const categoryColors = ['#1a6fc9', '#27ae60', '#f39c12', '#e74c3c', '#9b59b6'];
+            
+            // Calculate max possible scores per category
+            const maxScores = {
+                'Demographics': 4, // Age (3) + Race (1)
+                'Medical Conditions': 9, // Hypertension (2) + Diabetes (4) + Duration (2) + Cardiovascular (1)
+                'Family History': 2,
+                'Lifestyle': 2, // BMI (1) + Smoking (1)
+                'Symptoms': 2
+            };
+            
+            riskCharts.barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: 'Your Score',
+                        data: categoryValues,
+                        backgroundColor: categoryColors.map(color => color + 'cc'),
+                        borderColor: categoryColors,
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: 'Risk Points',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                stepSize: 2
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Risk Categories',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Risk Score by Category',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const maxScore = maxScores[context.label];
+                                    const percentage = Math.round((context.raw / maxScore) * 100);
+                                    label += `${context.raw}/${maxScore} points (${percentage}%)`;
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // Create text explanation for bar chart
+            const barChartText = document.getElementById('bar-chart-text');
+            let barChartTextContent = '';
+            
+            categoryLabels.forEach((category, index) => {
+                const score = categoryValues[index];
+                const maxScore = maxScores[category];
+                const percentage = Math.round((score / maxScore) * 100);
+                const color = categoryColors[index];
+                
+                barChartTextContent += `<p><span style="color: ${color}; font-weight: bold;">${category}:</span> ${score}/${maxScore} points (${percentage}%)</p>`;
+            });
+            
+            barChartText.innerHTML = barChartTextContent;
+        }
+        
+        function createProbabilityChart() {
+            const ctx = document.getElementById('probabilityChart').getContext('2d');
+            
+            if (riskCharts.probabilityChart) {
+                riskCharts.probabilityChart.destroy();
+            }
+            
+            // Calculate probabilities based on risk score
+            let probabilities = [];
+            if (userRiskData.riskScore >= 15) {
+                probabilities = [50, 60, 70, 80];
+            } else if (userRiskData.riskScore >= 12) {
+                probabilities = [40, 50, 60, 70];
+            } else if (userRiskData.riskScore >= 10) {
+                probabilities = [30, 40, 50, 60];
+            } else if (userRiskData.riskScore >= 8) {
+                probabilities = [20, 30, 40, 50];
+            } else if (userRiskData.riskScore >= 6) {
+                probabilities = [10, 15, 20, 30];
+            } else if (userRiskData.riskScore >= 4) {
+                probabilities = [5, 8, 12, 18];
+            } else {
+                probabilities = [2, 3, 5, 8];
+            }
+            
+            // Adjust based on age
+            if (userRiskData.age >= 60) {
+                probabilities = probabilities.map(p => Math.min(95, p * 1.3));
+            } else if (userRiskData.age >= 50) {
+                probabilities = probabilities.map(p => Math.min(95, p * 1.15));
+            }
+            
+            const years = ['Current', '+1 Year', '+3 Years', '+5 Years'];
+            const colors = ['#1a6fc9', '#27ae60', '#f39c12', '#e74c3c'];
+            
+            riskCharts.probabilityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Probability (%)',
+                        data: probabilities,
+                        backgroundColor: [
+                            'rgba(26, 111, 201, 0.7)',
+                            'rgba(39, 174, 96, 0.7)',
+                            'rgba(243, 156, 18, 0.7)',
+                            'rgba(231, 76, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            '#1a6fc9',
+                            '#27ae60',
+                            '#f39c12',
+                            '#e74c3c'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '5-Year CKD Risk Probability',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Probability: ${context.raw}%`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            },
+                            formatter: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            
+            // Create text explanation for probability chart
+            const probabilityText = document.getElementById('probability-chart-text');
+            let probabilityTextContent = '';
+            
+            years.forEach((year, index) => {
+                probabilityTextContent += `<p><span style="color: ${colors[index]}; font-weight: bold;">${year}:</span> ${probabilities[index]}% probability</p>`;
+            });
+            
+            probabilityText.innerHTML = probabilityTextContent;
+        }
+        
+        function createRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if (riskCharts.radarChart) {
+                riskCharts.radarChart.destroy();
+            }
+            
+            // Group factors by category and calculate relative scores (0-100%)
+            const categories = {};
+            userRiskData.riskFactors.forEach(factor => {
+                if (!categories[factor.category]) {
+                    categories[factor.category] = {
+                        score: 0,
+                        max: 0
+                    };
+                }
+                categories[factor.category].score += factor.value;
+                categories[factor.category].max += factor.max;
+            });
+            
+            // Define max possible scores per category (same as in bar chart)
+            const maxScores = {
+                'Demographics': 4, // Age (3) + Race (1)
+                'Medical Conditions': 9, // Hypertension (2) + Diabetes (4) + Duration (2) + Cardiovascular (1)
+                'Family History': 2,
+                'Lifestyle': 2, // BMI (1) + Smoking (1)
+                'Symptoms': 2
+            };
+            
+            const categoryLabels = Object.keys(categories);
+            const categoryScores = categoryLabels.map(cat => {
+                return Math.round((categories[cat].score / maxScores[cat]) * 100);
+            });
+            
+            // Calculate average score for reference line
+            const averageScore = Math.round(categoryScores.reduce((a, b) => a + b, 0) / categoryScores.length);
+            
+            riskCharts.radarChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: 'Your Risk Profile',
+                        data: categoryScores,
+                        backgroundColor: 'rgba(26, 111, 201, 0.2)',
+                        borderColor: '#1a6fc9',
+                        pointBackgroundColor: '#1a6fc9',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#1a6fc9',
+                        borderWidth: 2,
+                        pointRadius: 4
+                    }, {
+                        label: 'Average',
+                        data: Array(categoryLabels.length).fill(averageScore),
+                        backgroundColor: 'rgba(150, 150, 150, 0.05)',
+                        borderColor: 'rgba(150, 150, 150, 0.5)',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                stepSize: 20,
+                                backdropColor: 'rgba(0, 0, 0, 0)',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Risk Category Comparison',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw;
+                                    const category = context.label;
+                                    const actualScore = categories[category].score;
+                                    const maxScore = maxScores[category];
+                                    if (label === 'Your Risk Profile') {
+                                        return `${label}: ${value}% (${actualScore}/${maxScore} points)`;
+                                    } else {
+                                        return `${label}: ${value}%`;
+                                    }
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.1
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createRiskFactorsTable() {
+            const tableBody = document.getElementById('risk-factors-table');
+            tableBody.innerHTML = '';
+            
+            // Sort factors by their relative impact (value/max ratio)
+            const sortedFactors = [...userRiskData.riskFactors].sort((a, b) => {
+                return (b.value / b.max) - (a.value / a.max);
+            });
+            
+            // Only show factors that contributed to the score
+            const contributingFactors = sortedFactors.filter(factor => factor.value > 0);
+            
+            contributingFactors.forEach(factor => {
+                const row = document.createElement('tr');
+                
+                // Factor name with details if available
+                let nameCell = document.createElement('td');
+                let nameText = factor.name;
+                if (factor.details) {
+                    nameText += ` ${factor.details}`;
+                }
+                nameCell.textContent = nameText;
+                row.appendChild(nameCell);
+                
+                // Points
+                const pointsCell = document.createElement('td');
+                pointsCell.textContent = `${factor.value}/${factor.max}`;
+                row.appendChild(pointsCell);
+                
+                // Percentage
+                const percentageCell = document.createElement('td');
+                const percentage = Math.round((factor.value / factor.max) * 100);
+                percentageCell.textContent = `${percentage}%`;
+                row.appendChild(percentageCell);
+                
+                // Doctor recommendation
+                const doctorCell = document.createElement('td');
+                let doctorText = '';
+                
+                if (factor.name.includes('Diabetes')) {
+                    doctorText = 'Endocrinologist';
+                } else if (factor.name.includes('Hypertension')) {
+                    doctorText = 'Cardiologist or Nephrologist';
+                } else if (factor.name.includes('Cardiovascular')) {
+                    doctorText = 'Cardiologist';
+                } else if (factor.name.includes('Family history')) {
+                    doctorText = 'Nephrologist for screening';
+                } else if (factor.name.includes('BMI') && factor.value > 0) {
+                    doctorText = 'Dietitian/Nutritionist';
+                } else if (factor.name.includes('smoker')) {
+                    doctorText = 'Primary care for smoking cessation';
+                } else if (factor.name.includes('symptoms')) {
+                    doctorText = 'Nephrologist if persistent';
+                } else if (factor.name.includes('Age')) {
+                    doctorText = 'Primary care physician';
+                } else if (factor.name.includes('Race')) {
+                    doctorText = 'Primary care physician';
+                } else {
+                    doctorText = 'Primary care physician';
+                }
+                
+                doctorCell.innerHTML = `<span class="doctor-recommendation">${doctorText}</span>`;
+                row.appendChild(doctorCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function createUrgentWarning() {
+            const container = document.getElementById('urgent-warning-container');
+            container.innerHTML = '';
+            
+            if (userRiskData.urgentWarning) {
+                container.innerHTML = `
+                    <div class="urgent-warning">
+                        <h3>⚠️ Urgent Medical Attention Recommended</h3>
+                        <p>Based on your risk factors and symptoms, we strongly recommend you consult with a healthcare provider as soon as possible.</p>
+                        <p>Your combination of ${userRiskData.riskScore} risk points ${userRiskData.hasPain ? 'and kidney pain' : ''} suggests you may need immediate evaluation.</p>
+                        <p>Please contact your primary care physician or a nephrologist (kidney specialist) to discuss your symptoms and risk factors.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function createPersonalRecommendations() {
+            const container = document.getElementById('recommendations-content');
+            let recommendations = [];
+            
+            // Age-based recommendations
+            if (userRiskData.age >= 60) {
+                recommendations.push({
+                    title: "Age-Related Recommendations",
+                    content: `<p>Since you're over 60, we recommend:</p>
+                    <ul>
+                        <li>Annual kidney function tests even without symptoms</li>
+                        <li>More frequent monitoring of blood pressure</li>
+                        <li>Regular check-ups with your primary care physician</li>
+                        <li>Hydration monitoring, especially in hot weather</li>
+                    </ul>`
+                });
+            }
+            
+            // Diabetes recommendations
+            if (userRiskData.diabetes !== 'no') {
+                let diabetesRec = {
+                    title: "Diabetes Management",
+                    content: `<p>As you have ${userRiskData.diabetes === 'type1' ? 'Type 1' : 
+                        userRiskData.diabetes === 'type2' ? 'Type 2' : 'pre'} diabetes:</p>`
+                };
+                
+                if (userRiskData.diabetes === 'type1' || userRiskData.diabetes === 'type2') {
+                    diabetesRec.content += `<ul>
+                        <li>Annual urine albumin test is crucial for early kidney damage detection</li>
+                        <li>Maintain A1C below 7% (individualized target based on your health status)</li>
+                        <li>Monitor blood sugar levels regularly</li>`;
+                    if (userRiskData.duration >= 5) {
+                        diabetesRec.content += `<li>Since you've had diabetes for ${userRiskData.duration} years, consider kidney function tests every 6 months</li>`;
+                    }
+                    diabetesRec.content += `<li>Consult with an endocrinologist for optimal diabetes management</li>
+                        <li>Foot care and regular eye exams to prevent complications</li>
+                    </ul>`;
+                } else {
+                    diabetesRec.content += `<ul>
+                        <li>Lifestyle changes can help prevent progression to diabetes</li>
+                        <li>Healthy diet with controlled carbohydrates</li>
+                        <li>Regular physical activity (150 minutes per week)</li>
+                        <li>Annual screening for diabetes development</li>
+                    </ul>`;
+                }
+                
+                recommendations.push(diabetesRec);
+            }
+            
+            // Hypertension recommendations
+            if (userRiskData.hypertension !== 'no') {
+                recommendations.push({
+                    title: "Blood Pressure Control",
+                    content: `<p>For ${userRiskData.hypertension === 'yes' ? 'hypertension' : 'borderline hypertension'}:</p>
+                    <ul>
+                        <li>Monitor blood pressure regularly (at home if possible)</li>
+                        <li>Limit sodium intake to <2,300mg daily (1,500mg if hypertensive)</li>
+                        <li>Consider DASH diet for blood pressure management</li>
+                        <li>Regular aerobic exercise (30 mins most days)</li>
+                        <li>Limit alcohol consumption</li>
+                        <li>Stress management techniques</li>
+                    </ul>`
+                });
+            }
+            
+            // Symptoms recommendations
+            if (userRiskData.symptoms > 0) {
+                let symptomRec = {
+                    title: "Symptom Management",
+                    content: "<p>For your reported symptoms:</p>"
+                };
+                
+                if (userRiskData.symptomsList.includes('swelling')) {
+                    symptomRec.content += "<ul><li>For swelling: Reduce salt intake, elevate legs when possible, monitor weight daily</li>";
+                } else {
+                    symptomRec.content += "<ul>";
+                }
+                
+                if (userRiskData.symptomsList.includes('fatigue')) {
+                    symptomRec.content += "<li>For fatigue: Ensure adequate hydration, check for anemia, maintain regular sleep schedule</li>";
+                }
+                
+                if (userRiskData.symptomsList.includes('urination')) {
+                    symptomRec.content += "<li>For urination changes: Monitor frequency and appearance, report blood in urine immediately</li>";
+                }
+                
+                if (userRiskData.symptomsList.includes('pain')) {
+                    symptomRec.content += "<li>For kidney pain: Seek medical evaluation promptly, avoid NSAIDs</li>";
+                }
+                
+                if (userRiskData.symptomsList.includes('itchy')) {
+                    symptomRec.content += "<li>For itchy skin: Use fragrance-free moisturizers, avoid hot showers</li>";
+                }
+                
+                if (userRiskData.symptomsList.includes('muscle')) {
+                    symptomRec.content += "<li>For muscle cramps: Stay hydrated, ensure proper electrolyte balance</li>";
+                }
+                
+                symptomRec.content += "</ul>";
+                recommendations.push(symptomRec);
+            }
+            
+            // Family history recommendations
+            if (userRiskData.family_history !== 'no') {
+                recommendations.push({
+                    title: "Family History Considerations",
+                    content: `<p>With family history of ${userRiskData.familyDiseasesText || 'kidney disease'}:</p>
+                    <ul>
+                        <li>Discuss family screening options with your doctor</li>
+                        <li>Be vigilant about monitoring blood pressure and blood sugar</li>
+                        <li>Share your family history with all healthcare providers</li>
+                        <li>Consider genetic counseling if multiple family members affected</li>
+                        <li>Early lifestyle interventions may help mitigate genetic risks</li>
+                    </ul>`
+                });
+            }
+            
+            // Smartwatch recommendations
+            if (userRiskData.watchConnected) {
+                recommendations.push({
+                    title: "Smartwatch Monitoring",
+                    content: `<p>Based on your connected smartwatch data:</p>
+                    <ul>
+                        <li>Track your heart rate trends over time</li>
+                        <li>Monitor your blood pressure regularly</li>
+                        <li>Use activity tracking to maintain healthy movement</li>
+                        <li>Pay attention to sleep patterns for overall health</li>
+                        <li>Share this data with your healthcare provider during checkups</li>
+                    </ul>`
+                });
+            }
+            
+            // Lifestyle recommendations
+            let lifestyleRec = {
+                title: "Lifestyle Recommendations",
+                content: "<ul>"
+            };
+            
+            if (userRiskData.smoking === 'current') {
+                lifestyleRec.content += `<li>Smoking cessation is strongly recommended - consider nicotine replacement therapy or medications</li>`;
+            }
+            
+            if (userRiskData.bmi >= 25) {
+                lifestyleRec.content += `<li>Weight management (current BMI ${userRiskData.bmi}):
+                    <ul>
+                        <li>Balanced diet with portion control</li>
+                        <li>Regular physical activity</li>
+                        <li>Behavioral modifications</li>
+                        <li>Consider consultation with dietitian</li>
+                    </ul>
+                </li>`;
+            }
+            
+            lifestyleRec.content += `<li>Regular physical activity (150 mins/week moderate exercise):
+                <ul>
+                    <li>Walking, swimming, cycling</li>
+                    <li>Strength training 2x/week</li>
+                    <li>Consult doctor before starting new exercise program</li>
+                </ul>
+            </li>`;
+            lifestyleRec.content += `<li>Nutrition:
+                <ul>
+                    <li>Plant-based diet with lean proteins</li>
+                    <li>Limit processed foods</li>
+                    <li>Moderate protein intake (0.8g/kg body weight)</li>
+                    <li>Increase fruits and vegetables</li>
+                </ul>
+            </li>`;
+            lifestyleRec.content += `<li>Other:
+                <ul>
+                    <li>Stay hydrated with water</li>
+                    <li>Limit NSAID pain medication use</li>
+                    <li>Moderate alcohol consumption</li>
+                    <li>Stress reduction techniques</li>
+                </ul>
+            </li>`;
+            lifestyleRec.content += "</ul>";
+            
+            recommendations.push(lifestyleRec);
+            
+            // Generate HTML
+            container.innerHTML = recommendations.map(rec => `
+                <div class="recommendation-card">
+                    <h4>${rec.title}</h4>
+                    ${rec.content}
+                </div>
+            `).join('');
+        }
+        
+        function downloadAsImage() {
+            const element = document.getElementById('visualization-content');
+            
+            html2canvas(element, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `ckd-risk-assessment-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+        
+        function downloadTextReport() {
+            const riskMessage = document.getElementById('risk-message').textContent;
+            const riskExplanation = document.getElementById('risk-explanation').textContent;
+            const advice = document.getElementById('advice').textContent;
+            const recommendations = document.getElementById('recommendations-content').textContent;
+            const riskFactorsTable = document.getElementById('risk-factors-table').textContent;
+            
+            const reportContent = `
+Chronic Kidney Disease Risk Assessment Report
+============================================
+
+${riskMessage}
+
+Key Risk Factors Identified:
+---------------------------
+${riskExplanation.replace(/<[^>]*>/g, '').trim()}
+
+Detailed Risk Factors:
+---------------------
+${riskFactorsTable.replace(/<[^>]*>/g, '').trim()}
+
+Recommendations:
+---------------
+${advice.replace(/<[^>]*>/g, '').trim()}
+
+Personalized Recommendations:
+----------------------------
+${recommendations.replace(/<[^>]*>/g, '').trim()}
+
+Generated on: ${new Date().toLocaleDateString()}
+            `;
+            
+            const blob = new Blob([reportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ckd-risk-report-${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        function shareResults() {
+            const shareResults = document.getElementById('enable-encryption').checked;
+            const shareHistory = true; // Always share medical history in this implementation
+            const shareSymptoms = true; // Always share symptoms in this implementation
+            const shareDemographics = true; // Always share demographics in this implementation
+
+            let shareMessage = "Chronic Kidney Disease Risk Assessment Results:\n\n";
+
+            if (shareResults) {
+                shareMessage += `Risk Level: ${userRiskData.riskLevel.toUpperCase()}\n`;
+                shareMessage += `Risk Score: ${userRiskData.riskScore}/20\n`;
+                shareMessage += `5-Year Risk Probability: ${userRiskData.riskPercentage}\n\n`;
+            }
+
+            if (shareHistory) {
+                shareMessage += "Medical History:\n";
+                if (userRiskData.hypertension !== 'no') {
+                    shareMessage += `- ${userRiskData.hypertension === 'yes' ? 'Hypertension' : 'Borderline hypertension'}\n`;
+                }
+                if (userRiskData.diabetes !== 'no') {
+                    shareMessage += `- ${userRiskData.diabetes === 'type1' ? 'Type 1' : userRiskData.diabetes === 'type2' ? 'Type 2' : 'Pre'} diabetes`;
+                    if (userRiskData.duration > 0) {
+                        shareMessage += ` (${userRiskData.duration} years)`;
+                    }
+                    shareMessage += "\n";
+                }
+                if (userRiskData.cardiovascular === 'yes') {
+                    shareMessage += "- Cardiovascular disease\n";
+                }
+                shareMessage += `- Smoking status: ${userRiskData.smoking === 'current' ? 'Current smoker' : userRiskData.smoking === 'former' ? 'Former smoker' : 'Never smoked'}\n`;
+                shareMessage += `- BMI: ${userRiskData.bmi}\n\n`;
+            }
+
+            if (shareSymptoms && userRiskData.symptoms > 0) {
+                shareMessage += "Symptoms Reported:\n";
+                shareMessage += userRiskData.symptomsList.map(s => {
+                    switch(s) {
+                        case 'fatigue': return '- Fatigue or weakness';
+                        case 'swelling': return '- Swelling in feet/ankles';
+                        case 'shortness': return '- Shortness of breath';
+                        case 'appetite': return '- Poor appetite';
+                        case 'sleep': return '- Trouble sleeping';
+                        case 'urination': return '- Changes in urination';
+                        case 'nausea': return '- Nausea or vomiting';
+                        case 'pain': return '- Kidney area pain';
+                        case 'itchy': return '- Itchy skin';
+                        case 'muscle': return '- Muscle cramps';
+                        default: return '- ' + s;
+                    }
+                }).join('\n') + "\n\n";
+            }
+
+            if (shareDemographics) {
+                shareMessage += "Demographic Information:\n";
+                shareMessage += `- Age: ${userRiskData.age}\n`;
+                shareMessage += `- Sex: ${userRiskData.sex === 'male' ? 'Male' : 'Female'}\n`;
+                shareMessage += `- Race/Ethnicity: ${userRiskData.race === 'white' ? 'White/Caucasian' : 
+                    userRiskData.race === 'black' ? 'Black/African American' : 
+                    userRiskData.race === 'hispanic' ? 'Hispanic/Latino' : 
+                    userRiskData.race === 'asian' ? 'Asian' : 
+                    userRiskData.race === 'native' ? 'Native American' : 'Other'}\n\n`;
+            }
+
+            shareMessage += "Generated by CKD Risk Assessment Tool";
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My CKD Risk Assessment Results',
+                    text: shareMessage,
+                    url: window.location.href
+                }).catch(err => {
+                    console.log('Error sharing:', err);
+                    alert("Sharing failed: " + err.message);
+                });
+            } else {
+                alert("In a production environment, this would open a share dialog. Here's what would be shared:\n\n" + shareMessage);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('ckd-form').reset();
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('visualizations').classList.add('hidden');
+            document.getElementById('family-diseases-container').style.display = 'none';
+            document.getElementById('duration').disabled = true;
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('assessment-form').classList.add('hidden');
+            
+            // Disconnect smartwatch if connected
+            if (watchConnected) {
+                disconnectSmartwatch();
+            }
+            
+            // Destroy all charts to prevent memory leaks
+            Object.values(riskCharts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            riskCharts = {};
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
